@@ -1,0 +1,14 @@
+sudo: true
+dist: python:2-stretch
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      - docker build -t ansible .
+      - docker images
+      - docker tag ansible $DOCKER_USERNAME/ansible
+      - docker push $DOCKER_USERNAME/ansible
+    - stage: test
+      script: docker run --rm $DOCKER_USERNAME/ansible ansible --version
