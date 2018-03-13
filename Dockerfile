@@ -15,4 +15,4 @@ RUN pip install -r requirements.txt
 
 ENV container=docker
 # CMD ["/sbin/init"]
-CMD ["$@"]
+CMD ["/bin/bash"]
