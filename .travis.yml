@@ -3,20 +3,14 @@ sudo: required
 services:
   - docker
 
-language: shell
-
-# go:
-#   - '1.5'
-
 env:
   global:
   - secure: G41wNYuzuhVsFsZqpOjFR+LOr6w8xa6VJYJ+TSzZMhEpQuYQOc/u11hPwc3whyjYmVTpWZ+zr4Zt54xfnB06vYgO3kaudEnDzPBKxldgyWuSCIA36+uiQLc6h6SvmxFd9M0MmOWtbTVf3SZq1Pm0k47CSzxlYAdzFYUroaaRVp6oEgLRuMcfTrnmasCl8gLo8sTr5MKGP8Lo0bI6bI0i3ndnaB6+qU1bYbkDSptCKoPr6cxnl1EZlIhrPf3Bh846Kk6K1+LLTpQDg0dfkHUVRsY00PTNz9+GOmAbFpz4l08drCkvsJopwfO9VgVw6QuuEZ6DDLCKS5rr8HCF1RsW0w7e4xfwpP1buUa4dRjDZgIyEaKDXAD+sSVsgJN7Qj6c+FUj6UTY26w02eapNytEz499y0vLN8PRHk3WFpkFvAKRSjgVSip1LNjlnh6TeEqVdRGgkD8CrTCE6uIIkUHiy4onfn8JR+gNZyHHxIiu9pj4WbwnM70WbBFAz0zYbQtHbouAWih0oEzJCH8dX1AhSNNviwTBPlJNVvuy0vAAKxLOIrHvi7vYVm9w7m59oLN2GZxMordovdU0Fs/lsmcBJVE6sKzbg9Z/g9c0MJKikdPYkfh4aBZNYUSYOzMJs6EKJ55o19cxGvgNhUJbF8C9sjjWHor+50mMnhpOW9ORe1s=
   - secure: NrIVKp9yVBQAo0nXBowbRRiNgjpW8afDNFx3UXNm4+u7842qyoqahuaiJS5OpG9Ph+qgA4aBJajlmyYyms6fw/vlQ8Z3hou2EmemEVhD4tSps8yaAiZWdadFoAcD82MqHQ9/GwQCnZQCQvNEZx7wn50ysvbiD0nTbLRFZhgs+2gjy5+1LVupBuEgQN2aPTUx/dpqx2rMLjl7huTbKWnV3bOwzK7VFer0gtWk03VBTABRaAiXkSqdKegUmfVtaMZ0gQkl15aTArGOLh9u27Z0OQXNzOKicT8Q1jtrdF11Tef3avUrcxQHNMHa1bUAIAA4WcUWYqvLXMU1fAv6z7vq9rjt3Msq5mYil0fPjCdolcg/YA0rIC80K7Jh322evBmMUEM2YCmGynu5Lm25k9p260cS2BW4gVhpJJweRljS501gFdujqT4qcpW19nALrFMIhw4N0sS1ce3UXCaQWmXYPxDEbEXCMzxWhR8yLVDODUQvKoyNvnOD5Ixtk8j3/YbZPGUwyPpLJIwfrbhJNxVmia/m9S0gOYNHCkFSIIYA1J6ydbSAz2A+TuuDbLTqTBwWA+WZm/+OmDzhguTJBp/VBUdJvXBU91uy9Ro/d8fz3MORhURgtEDEz8h2WwvDXeXIkYgICAYxoaEL67g+uIbDhamsGrWFENfG3cyyXBrS+sM=
   - COMMIT=${TRAVIS_COMMIT::8}
 
-after_success:
-  # - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+build_ansible_docker:
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - export REPO=$DOCKER_USERNAME/ansible
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
   - docker build -f Dockerfile -t $REPO:$COMMIT .
@@ -24,14 +18,5 @@ after_success:
   - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
   - docker push $REPO
 
-# jobs:
-#   include:
-#   - stage: build docker image
-#     script:
-#     - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-#     - docker build -t ansible .
-#     - docker images
-#     - docker tag ansible $DOCKER_USERNAME/ansible
-#     - docker push $DOCKER_USERNAME/ansible
-#   - stage: test
-#     script: docker run --rm $DOCKER_USERNAME/ansible ansible --version
+test_ansible_docker:
+  - docker run -it --rm $DOCKER_USERNAME/ansible ansible --version
