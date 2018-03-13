@@ -11,17 +11,13 @@ env:
   - secure: NrIVKp9yVBQAo0nXBowbRRiNgjpW8afDNFx3UXNm4+u7842qyoqahuaiJS5OpG9Ph+qgA4aBJajlmyYyms6fw/vlQ8Z3hou2EmemEVhD4tSps8yaAiZWdadFoAcD82MqHQ9/GwQCnZQCQvNEZx7wn50ysvbiD0nTbLRFZhgs+2gjy5+1LVupBuEgQN2aPTUx/dpqx2rMLjl7huTbKWnV3bOwzK7VFer0gtWk03VBTABRaAiXkSqdKegUmfVtaMZ0gQkl15aTArGOLh9u27Z0OQXNzOKicT8Q1jtrdF11Tef3avUrcxQHNMHa1bUAIAA4WcUWYqvLXMU1fAv6z7vq9rjt3Msq5mYil0fPjCdolcg/YA0rIC80K7Jh322evBmMUEM2YCmGynu5Lm25k9p260cS2BW4gVhpJJweRljS501gFdujqT4qcpW19nALrFMIhw4N0sS1ce3UXCaQWmXYPxDEbEXCMzxWhR8yLVDODUQvKoyNvnOD5Ixtk8j3/YbZPGUwyPpLJIwfrbhJNxVmia/m9S0gOYNHCkFSIIYA1J6ydbSAz2A+TuuDbLTqTBwWA+WZm/+OmDzhguTJBp/VBUdJvXBU91uy9Ro/d8fz3MORhURgtEDEz8h2WwvDXeXIkYgICAYxoaEL67g+uIbDhamsGrWFENfG3cyyXBrS+sM=
   - COMMIT=${TRAVIS_COMMIT::8}
 
-before_install:
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - export REPO=$DOCKER_USERNAME/ansible
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker build -f Dockerfile -t $REPO:$COMMIT .
-  - docker ps -a
-  - docker tag $REPO:$COMMIT $REPO:$TAG
-  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
-
-deploy:
-  provider: script
-  script: bash docker_push
-  on:
-    branch: master
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      - docker build -t $DOCKER_USERNAME/ansible  .
+      - docker images
+      - docker push $DOCKER_USERNAME/ansible
+    - stage: test
+      script: docker run --rm $DOCKER_USERNAME/ansible ansible --version
