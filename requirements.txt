@@ -10,3 +10,5 @@ paramiko
 cryptography
 setuptools
 testinfra
+requests
+google-auth
